@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Model\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,8 +19,8 @@ class FolderFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'title' => fake()->title(), 
-            'description' => fake()->description(), 
+            'title' => fake()->title(),
+            'description' => fake()->description(),
             'status' => "public",
         ];
     }

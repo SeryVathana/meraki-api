@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FolderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
@@ -20,9 +21,12 @@ Route::group([
     'middleware' => 'auth:sanctum'
 ], function () {
     Route::get('post', [PostController::class, "index"]);
+    Route::get('post/mypost', [PostController::class, "getMyPosts"]);
+    Route::get('post/user/{id}', [PostController::class, "getUserPosts"]); // $id = user id
+    Route::get('post/group/{id}', [PostController::class, "getGroupPosts"]); // $id = group id
     Route::get('post/{id}', [PostController::class, "show"]);
     Route::post('post', [PostController::class, "store"]);
-    Route::put('post/{post}', [PostController::class, "update"]);
+    Route::put('post/{id}', [PostController::class, "update"]);
     Route::delete('post/{id}', [PostController::class, "destroy"]);
 
     Route::get('group', [GroupController::class, "index"]);
@@ -46,4 +50,10 @@ Route::group([
     Route::post('group/request/{id}', [GroupRequestController::class, "store"]); //$id = group id
     Route::put('group/request/accept/{id}', [GroupRequestController::class, "update"]); //$id = group id
     Route::delete('group/request/{id}', [GroupRequestController::class, "destroy"]); //$id = group id
+
+    //Folder
+    Route::get('folder', [FolderController::class, "index"]);
+    Route::post('folder', [FolderController::class, "store"]);
+    Route::put('folder/{id}', [FolderController::class, "update"]);
+    Route::delete('folder/{id}', [FolderController::class, "destroy"]);
 });

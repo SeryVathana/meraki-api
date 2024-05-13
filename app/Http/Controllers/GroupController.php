@@ -142,6 +142,11 @@ class GroupController extends Controller
      */
     public function update(UpdateGroupRequest $request, $id)
     {
+        $user = Auth::user();
+        $userId = $user->id;
+
+        print ($userId);
+
         $group = Group::find($id);
 
         if (!$group) {
@@ -175,21 +180,23 @@ class GroupController extends Controller
             ];
 
             return response()->json($data, 400);
-        } else {
-            $group = Group::find($id);
-
-            $group->title = $request->title;
-            $group->status = $request->status;
-
-            $group->save();
-
-            $data = [
-                "status" => 200,
-                "message" => "Group updated successfully"
-            ];
-
-            return response()->json($data, 200);
         }
+        $group = Group::find($id);
+
+        $group->title = $request->title;
+        $group->status = $request->status;
+
+        $group->save();
+
+        Post::where("group_id", "=", $group->id)->update(["status" => $request->status]);
+
+        $data = [
+            "status" => 200,
+            "message" => "Group updated successfully"
+        ];
+
+        return response()->json($data, 200);
+
 
     }
 
