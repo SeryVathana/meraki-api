@@ -22,7 +22,6 @@ class GroupRequestFactory extends Factory
         return [
             'user_id' => User::factory(),
             'group_id' => Group::factory(),
-
         ];
     }
 }

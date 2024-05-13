@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class GroupInvite extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'group_id'
+    ];
 }

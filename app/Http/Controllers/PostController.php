@@ -3,24 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Illuminate\Http\Request;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use Illuminate\Support\Facades\Gate;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $post = Post::all();
+
+
+        $post = Post::where("status", "public")->get();
         $data = [
-            'status'=>200,
-            'post'=>$post
+            'status' => 200,
+            'post' => $post
         ];
 
-        return response()->json($data,200);
+        return response()->json($data, 200);
     }
 
     /**
@@ -36,41 +42,46 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+
+        $user = Auth::user();
+        $userId = $user->id;
+        $userName = $user->username;
+
         $validator = Validator::make($request->all(), [
-            'user_id'=>'required',
-            'group_id'=>'nullable',
-            'title'=>'required',
-            'description'=>'nullable|max:255',
-            'img_url'=>'required',
-            'status'=>'required',
+            'group_id' => 'nullable',
+            'title' => 'required',
+            'description' => 'nullable|max:255',
+            'img_url' => 'required',
+            'status' => 'required',
         ]);
 
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
 
             $data = [
-                "status"=>400,
-                "message"=>$validator->messages()
+                "status" => 400,
+                "message" => $validator->messages()
             ];
 
-            return response()->json($data,400);
+            return response()->json($data, 400);
 
         } else {
             $post = new Post;
 
-            $post->user_id=$request->user_id;
-            $post->group_id=$request->group_id;
-            $post->title=$request->title;
-            $post->description=$request->description;
-            $post->img_url=$request->img_url;
-            $post->status=$request->status;
+            $post->user_id = $userId;
+            $post->group_id = $request->group_id;
+            $post->title = $request->title;
+            $post->description = $request->description;
+            $post->likes = '[]';
+            $post->img_url = $request->img_url;
+            $post->status = $request->status;
 
             $post->save();
 
             $data = [
-                "status"=>200,
-                "message"=>"Post created successfully"
+                "status" => 200,
+                "message" => "Post created successfully"
             ];
 
             return response()->json($data, 200);
@@ -84,17 +95,17 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if(!$post) {
+        if (!$post) {
             $data = [
-                "status"=>404,
-                "message"=>"Post with id: $id is not found",
+                "status" => 404,
+                "message" => "Post with id: $id is not found",
             ];
 
             return response()->json($data, 404);
         } else {
             $data = [
-                "status"=>200,
-                "post"=>$post,
+                "status" => 200,
+                "post" => $post,
             ];
 
             return response()->json($data, 200);
@@ -106,54 +117,64 @@ class PostController extends Controller
      */
     public function edit(Post $post, )
     {
-        
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, $id)
+    public function update(Post $post, Request $request)
     {
+
+        if (!Gate::allows('update', $post)) {
+            $data = [
+                "status" => 403,
+                "message" => "Unauthorized"
+            ];
+
+            return response()->json($data, 403);
+        }
+
         $validator = Validator::make($request->all(), [
-            'title'=>'required',
-            'description'=>'nullable|max:255',
-            'img_url'=>'required',
-            'status'=>'required',
+            'title' => 'required',
+            'description' => 'nullable|max:255',
+            'img_url' => 'required',
+            'status' => 'required',
         ]);
 
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
 
             $data = [
-                "status"=>400,
-                "message"=>$validator->messages()
+                "status" => 400,
+                "message" => $validator->messages()
             ];
 
-            return response()->json($data,400);
+            return response()->json($data, 400);
 
         } else {
-            $post = Post::find($id);
+            // $post = Post::find($id);
 
-            if(!$post) {
-                $data = [
-                    "status"=>404,
-                    "message"=>"Post with id: $id is not found",
-                ];
-    
-                return response()->json($data, 404);
-            }
+            // if(!$post) {
+            //     $data = [
+            //         "status"=>404,
+            //         "message"=>"Post with id: $id is not found",
+            //     ];
 
-            $post->title=$request->title;
-            $post->description=$request->description;
-            $post->img_url=$request->img_url;
-            $post->status=$request->status;
+            //     return response()->json($data, 404);
+            // }
+
+            $post->title = $request->get('title');
+            $post->description = $request->get('description');
+            $post->img_url = $request->get('img_url');
+            $post->status = $request->get('status');
 
             $post->save();
 
             $data = [
-                "status"=>200,
-                "message"=>"Post updated successfully"
+                "status" => 200,
+                "message" => "Post updated successfully"
             ];
 
             return response()->json($data, 200);
@@ -167,10 +188,10 @@ class PostController extends Controller
     {
         $post = Post::find($id);
 
-        if(!$post) {
+        if (!$post) {
             $data = [
-                "status"=>404,
-                "message"=>"Post with id: $id is not found",
+                "status" => 404,
+                "message" => "Post with id: $id is not found",
             ];
 
             return response()->json($data, 404);
@@ -178,8 +199,8 @@ class PostController extends Controller
             $post->delete();
 
             $data = [
-                "status"=>200,
-                "message"=>"Post deleted successfully",
+                "status" => 200,
+                "message" => "Post deleted successfully",
             ];
 
             return response()->json($data, 200);

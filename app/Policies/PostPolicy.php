@@ -8,6 +8,10 @@ use Illuminate\Auth\Access\Response;
 
 class PostPolicy
 {
+    public function updateProduct(User $user, Product $product)
+    {
+        return $user->role === "admin" || $user->id === $product->owner_id;
+    }
     /**
      * Determine whether the user can view any models.
      */
@@ -37,7 +41,7 @@ class PostPolicy
      */
     public function update(User $user, Post $post): bool
     {
-        //
+        return $user->role === "admin" || $user->id === $post->user_id;
     }
 
     /**
